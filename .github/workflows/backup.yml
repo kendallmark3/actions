@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get code
-        uses: actions:checkout@v3 # Checks out your repository's code
+        uses: actions/checkout@v3 # Checks out your repository's code
 
       - name: Cache dependencies
         uses: actions/cache@v3
