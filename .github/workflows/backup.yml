@@ -1,5 +1,5 @@
-# .github/workflows/main.yml - Build and Test Workflow (Cleaned)
-name: Build and Test Workflow
+# .github/workflows/main.yml - Build, Test, and Deploy Workflow
+name: Build, Test, and Deploy Workflow
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get code
-        uses: actions/checkout@v3 # Checks out your repository's code
+        uses: actions:checkout@v3 # Checks out your repository's code
 
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -58,3 +58,26 @@ jobs:
 
       - name: Test code
         run: npm run test # Runs your project's test script
+
+  deploy:
+    # This job depends on both 'build' and 'test' jobs completing successfully.
+    # We only deploy if both the build is successful and tests pass.
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3 # Checks out your repository's code
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4 # Downloads the artifact uploaded by the 'build' job
+        with:
+          name: dist-files # Name of the artifact to download
+          path: dist # Path where the artifact will be downloaded (relative to the current working directory)
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3 # Action specifically designed for deploying to GitHub Pages
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN provided by GitHub Actions
+          publish_dir: ./dist # Specifies the directory to publish (where your built website is located)
+          # You can optionally specify a branch to publish to, e.g., 'gh-pages'
+          # publish_branch: gh-pages
