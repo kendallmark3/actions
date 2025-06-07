@@ -28,5 +28,6 @@
     "vite": "^3.0.7",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^0.22.1"
-  }
+  },
+  "homepage": "https://kendallmark3.github.io/actions/"
 }
