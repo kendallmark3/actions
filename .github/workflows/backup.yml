@@ -1,5 +1,5 @@
-# .github/workflows/main.yml - Complete Build, Test, and Deploy Workflow
-name: Build, Test, and Deploy Workflow
+# .github/workflows/main.yml - Final Build, Test, and Deploy Workflow for React App
+name: React App CI/CD
 
 on:
   push:
@@ -17,20 +17,21 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm # Path to the directory to cache
-          # Corrected hashFiles key syntax
+          # Corrected hashFiles key syntax for package-lock.json at root
           key: "deps-node-modules-${{ hashFiles('package-lock.json') }}"
 
       - name: Install dependencies
-        run: npm ci # Installs dependencies from package-lock.json
+        run: npm ci # Installs dependencies from package-lock.json (based on package.json)
 
-      - name: Build website
-        run: npm run build # Builds your website for production
+      - name: Build React App
+        run: npm run build # Builds your React application for production (using Vite build script)
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # Using version 4
+      - name: Upload built artifacts
+        # This step is now using v4 to avoid deprecation warnings/failures
+        uses: actions/upload-artifact@v4
         with:
           name: dist-files # Name for the uploaded artifact
-          path: dist # Path to the built files (relative to the working directory)
+          path: dist # Path to the built files (where Vite outputs, typically 'dist')
           if-no-files-found: warn # Warn if no files found, but don't fail job
           compression-level: 6
           overwrite: false
@@ -47,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm # Path to the directory to cache
-          # Corrected hashFiles key syntax
+          # Corrected hashFiles key syntax for package-lock.json at root
           key: "deps-node-modules-${{ hashFiles('package-lock.json') }}"
 
       - name: Install dependencies
@@ -64,8 +65,7 @@ jobs:
     # We only deploy if both the build is successful and tests pass.
     needs: [build, test]
     runs-on: ubuntu-latest
-    # THIS IS THE CRITICAL SECTION FOR PERMISSIONS
-    # It grants the default GITHUB_TOKEN the necessary rights for GitHub Pages.
+    # Grant necessary permissions for GitHub Pages deployment
     permissions:
       contents: write # Allows the action to commit and push to the repository (e.g., to the gh-pages branch)
       pages: write    # Specifically allows the action to deploy to GitHub Pages
@@ -75,7 +75,8 @@ jobs:
         uses: actions/checkout@v3 # Checks out your repository's code
 
       - name: Download built artifacts
-        uses: actions/download-artifact@v4 # Downloads the artifact uploaded by the 'build' job
+        # This step is now using v4
+        uses: actions/download-artifact@v4
         with:
           name: dist-files # Name of the artifact to download
           path: dist # Path where the artifact will be downloaded (relative to the current working directory)
@@ -85,5 +86,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN provided by GitHub Actions
           publish_dir: ./dist # Specifies the directory to publish (where your built website is located)
-          # You can optionally specify a branch to publish to, e.g., 'gh-pages'
-          # publish_branch: gh-pages
+          # Publish to the 'gh-pages' branch for project pages to avoid conflicts with 'main'.
+          publish_branch: gh-pages
