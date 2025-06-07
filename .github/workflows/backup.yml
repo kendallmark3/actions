@@ -67,7 +67,7 @@ jobs:
     # THIS IS THE CRITICAL SECTION FOR PERMISSIONS
     # It grants the default GITHUB_TOKEN the necessary rights for GitHub Pages.
     permissions:
-      contents: write # Allows the action to commit and push to the repository (e.g., to the main branch)
+      contents: write # Allows the action to commit and push to the repository (e.g., to the gh-pages branch)
       pages: write    # Specifically allows the action to deploy to GitHub Pages
       id-token: write # Required for OIDC authentication, often used by GitHub Pages deployments
     steps:
@@ -85,6 +85,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN provided by GitHub Actions
           publish_dir: ./dist # Specifies the directory to publish (where your built website is located)
-          # IMPORTANT: For a user/organization page (like kendallmark3.github.io),
-          # the content needs to be pushed to the 'main' branch.
-          publish_branch: main # Explicitly publish to the main branch
+          # IMPORTANT: Changed to 'gh-pages' to avoid the "deploy from main to main" conflict.
+          # GitHub Pages, when set to "GitHub Actions" as source, will automatically find this branch.
+          publish_branch: gh-pages # Explicitly publish to the gh-pages branch
