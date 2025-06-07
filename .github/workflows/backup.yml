@@ -1,5 +1,5 @@
-# .github/workflows/main.yml - Complete Build, Test, and Deploy Workflow
-name: Build, Test, and Deploy Workflow
+# .github/workflows/main.yml - Simple Static Site Deployment Workflow
+name: Static Site Deployment
 
 on:
   push:
@@ -7,62 +7,7 @@ on:
       - main # This workflow runs when code is pushed to the main branch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get code
-        uses: actions/checkout@v3 # Checks out your repository's code
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm # Path to the directory to cache
-          # Corrected hashFiles key syntax
-          key: "deps-node-modules-${{ hashFiles('package-lock.json') }}"
-
-      - name: Install dependencies
-        run: npm ci # Installs dependencies from package-lock.json
-
-      - name: Build website
-        run: npm run build # Builds your website for production
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # Using version 4
-        with:
-          name: dist-files # Name for the uploaded artifact
-          path: dist # Path to the built files (relative to the working directory)
-          if-no-files-found: warn # Warn if no files found, but don't fail job
-          compression-level: 6
-          overwrite: false
-          include-hidden-files: false
-
-  test:
-    needs: build # This job will only run after the 'build' job completes successfully
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get code
-        uses: actions/checkout@v3 # Checks out your repository's code
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm # Path to the directory to cache
-          # Corrected hashFiles key syntax
-          key: "deps-node-modules-${{ hashFiles('package-lock.json') }}"
-
-      - name: Install dependencies
-        run: npm ci # Installs dependencies from package-lock.json
-
-      - name: Lint code
-        run: npm run lint # Runs your project's lint script
-
-      - name: Test code
-        run: npm run test # Runs your project's test script
-
   deploy:
-    # This job depends on both 'build' and 'test' jobs completing successfully.
-    # We only deploy if both the build is successful and tests pass.
-    needs: [build, test]
     runs-on: ubuntu-latest
     # THIS IS THE CRITICAL SECTION FOR PERMISSIONS
     # It grants the default GITHUB_TOKEN the necessary rights for GitHub Pages.
@@ -74,17 +19,9 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3 # Checks out your repository's code
 
-      - name: Download built artifacts
-        uses: actions/download-artifact@v4 # Downloads the artifact uploaded by the 'build' job
-        with:
-          name: dist-files # Name of the artifact to download
-          path: dist # Path where the artifact will be downloaded (relative to the current working directory)
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3 # Action specifically designed for deploying to GitHub Pages
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN provided by GitHub Actions
-          publish_dir: ./dist # Specifies the directory to publish (where your built website is located)
-          # IMPORTANT: Changed to 'gh-pages' to avoid the "deploy from main to main" conflict.
-          # GitHub Pages, when set to "GitHub Actions" as source, will automatically find this branch.
-          publish_branch: gh-pages # Explicitly publish to the gh-pages branch
+          publish_dir: ./ # Specifies the directory to publish - assuming your static files are at the root
+          publish_branch: gh-pages # Explicitly publish to the gh-pages branch (standard for project pages)
