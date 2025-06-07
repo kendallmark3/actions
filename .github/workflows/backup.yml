@@ -1,4 +1,4 @@
-# .github/workflows/main.yml - Build, Test, and Deploy Workflow
+# .github/workflows/main.yml - Complete Build, Test, and Deploy Workflow
 name: Build, Test, and Deploy Workflow
 
 on:
@@ -64,6 +64,12 @@ jobs:
     # We only deploy if both the build is successful and tests pass.
     needs: [build, test]
     runs-on: ubuntu-latest
+    # THIS IS THE CRITICAL SECTION FOR PERMISSIONS
+    # It grants the default GITHUB_TOKEN the necessary rights for GitHub Pages.
+    permissions:
+      contents: write # Allows the action to commit and push to the repository (e.g., to the gh-pages branch)
+      pages: write    # Specifically allows the action to deploy to GitHub Pages
+      id-token: write # Required for OIDC authentication, often used by GitHub Pages deployments
     steps:
       - name: Get code
         uses: actions/checkout@v3 # Checks out your repository's code
